@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Clientes</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    h2, h3 {
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 8px 12px;
+      margin: 5px 2px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .btn-adicionar {
+      width: 100%;
+      background-color: #28a745;
+      color: white;
+      padding: 10px;
+    }
+
+    .btn-editar {
+      background-color: #ffc107;
+    }
+
+    .btn-excluir {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    #listaClientes {
+      padding: 0;
+      list-style: none;
+    }
+
+    #listaClientes li {
+      background-color: #f8f8f8;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h2>Cadastro de Clientes</h2>
+
+    <input id="nome" type="text" placeholder="Nome">
+    <input id="endereco" type="text" placeholder="Endereço">
+    <input id="telefone" type="text" placeholder="Telefone">
+
+    <button class="btn-adicionar" onclick="salvarCliente()">
+      Adicionar Cliente
+    </button>
+
+    <h3>Lista de Clientes</h3>
+
+    <ul id="listaClientes"></ul>
+
+  </div>
+
+  <script>
+
+    // Guarda o cliente que está sendo editado
+    let clienteEditando = -1;
+
+    // Carrega os clientes do localStorage
+    function carregarClientes() {
+      const clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+
+      const lista = document.getElementById("listaClientes");
+
+      lista.innerHTML = "";
+
+      clientes.forEach(function(cliente, index) {
+
+        const item = document.createElement("li");
+
+        item.innerHTML = `
+          <strong>${cliente.nome}</strong><br>
+          Endereço: ${cliente.endereco}<br>
+          Telefone: ${cliente.telefone}<br>
+
+          <button class="btn-editar" onclick="editarCliente(${index})">
+            Editar
+          </button>
+
+          <button class="btn-excluir" onclick="excluirCliente(${index})">
+            Excluir
+          </button>
+        `;
+
+        lista.appendChild(item);
+      });
+    }
+
+
+    // Salva ou atualiza um cliente
+    function salvarCliente() {
+
+      const nome = document.getElementById("nome").value.trim();
+      const endereco = document.getElementById("endereco").value.trim();
+      const telefone = document.getElementById("telefone").value.trim();
+
+      // Verifica se os campos foram preenchidos
+      if (nome === "" || endereco === "" || telefone === "") {
+        alert("Preencha todos os campos!");
+        return;
+      }
+
+      const clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+
+      const cliente = {
+        nome: nome,
+        endereco: endereco,
+        telefone: telefone
+      };
+
+      // Se -1, é um novo cliente
+      if (clienteEditando === -1) {
+        clientes.push(cliente);
+      } else {
+        // Atualiza o cliente existente
+        clientes[clienteEditando] = cliente;
+
+        clienteEditando = -1;
+
+        document.querySelector(".btn-adicionar").textContent =
+          "Adicionar Cliente";
+      }
+
+      // Salva no localStorage
+      localStorage.setItem("clientes", JSON.stringify(clientes));
+
+      limparCampos();
+      carregarClientes();
+    }
+
+
+    // Edita um cliente
+    function editarCliente(index) {
+
+      const clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+
+      const cliente = clientes[index];
+
+      document.getElementById("nome").value = cliente.nome;
+      document.getElementById("endereco").value = cliente.endereco;
+      document.getElementById("telefone").value = cliente.telefone;
+
+      clienteEditando = index;
+
+      document.querySelector(".btn-adicionar").textContent =
+        "Salvar Alterações";
+    }
+
+
+    // Exclui um cliente
+    function excluirCliente(index) {
+
+      if (!confirm("Deseja realmente excluir este cliente?")) {
+        return;
+      }
+
+      const clientes = JSON.parse(localStorage.getItem("clientes")) || [];
+
+      clientes.splice(index, 1);
+
+      localStorage.setItem("clientes", JSON.stringify(clientes));
+
+      carregarClientes();
+    }
+
+
+    // Limpa os campos
+    function limparCampos() {
+
+      document.getElementById("nome").value = "";
+      document.getElementById("endereco").value = "";
+      document.getElementById("telefone").value = "";
+    }
+
+
+    // Carrega a lista quando a página abre
+    carregarClientes();
+
+  </script>
+
+</body>
+</html>
